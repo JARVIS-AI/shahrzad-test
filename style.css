@@ -1,93 +1,175 @@
-/* 
-** Change this if you need to modify
-** the amount of lines displayed
-*/
 /*
-** Leave these unless you want
-** to open a whole can of worms
+This demo was very old and overly complex
+I have updated it with a cleaner, more modern technique
+It still uses mix-blend-modes, so the basic idea hasn't changed
+
+Original
+https://codepen.io/giana/pen/MWxONWm
 */
-/*
-** Set up the experiment
-*/
-html {
-  background-color: #5138BE;
-  height: 100%;
+
+/* Create pseudo elements for both elements */
+.text-effect-wrapper,
+.text {
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+}
+
+.text-effect-wrapper {
+  /* Can be anything light-colored */
+  --spotlight-color: white;
+
+  overflow: hidden;
+  position: relative;
+
+  /* Shimmer animation */
+  &::before {
+    -webkit-animation: shimmer 5s infinite linear;
+            animation: shimmer 5s infinite linear;
+    background: 
+      radial-gradient(circle, var(--spotlight-color), transparent 25%) 0 0 / 25% 25%,
+      radial-gradient(circle, var(--spotlight-color), black 25%) 50% 50% / 12.5% 12.5%;
+    inset-block-start: -100%;
+    inset-inline-start: -100%;
+    mix-blend-mode: color-dodge;
+    z-index: 3;
+  }
+
+  /* Extra filter to boost colors and contrast */
+  &::after {
+    -webkit-backdrop-filter: blur(1px) brightness(90%) contrast(150%);
+            backdrop-filter: blur(1px) brightness(90%) contrast(150%);
+    z-index: 4;
+  }
+}
+
+@-webkit-keyframes shimmer {
+  100% {
+    transform: translate3d(50%, 50%, 0);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translate3d(50%, 50%, 0);
+  }
+}
+
+.text {
+  /* Mask colors */
+  /* Should be black and white */
+  --background-color: black;
+  --text-color: white;
+
+  /* Text color */
+  /* Can be anything */
+  --color-1: red;
+  --color-2: blue;
+
+  /* Fuzzy white outline text */
+  color: transparent;
+  text-shadow: 
+    0 0 0.02em var(--background-color), 
+    0 0 0.02em var(--text-color),
+    0 0 0.02em var(--text-color), 
+    0 0 0.02em var(--text-color);
+
+  /* Improve contrast of outline */
+  &::before {
+    -webkit-backdrop-filter: blur(0.013em) brightness(400%);
+            backdrop-filter: blur(0.013em) brightness(400%);
+    z-index: 1;
+  }
+
+  /* Add text color */
+  &::after {
+    background: linear-gradient(45deg, var(--color-1), var(--color-2));
+    mix-blend-mode: multiply;
+    z-index: 2;
+  }
+}
+
+/* Alternative styling */
+body:has(#option-toggle:checked) {
+  & .text-effect-wrapper {
+    --spotlight-color: orange;
+    
+    &::after {
+      -webkit-backdrop-filter: brightness(90%) contrast(150%);
+              backdrop-filter: brightness(90%) contrast(150%);
+    }
+  }
+
+  & .text {
+    --angle: 5deg;
+    --color-1: hsl(163, 100%, 51%);
+    --color-2: hsl(295, 88%, 32%);
+    --color-3: hsl(59, 100%, 50%);
+
+    text-shadow: 
+      0 0 0.03em var(--background-color),
+      0 0 0.03em var(--text-color);
+    
+    &::before {
+      -webkit-backdrop-filter: brightness(150%) contrast(200%);
+              backdrop-filter: brightness(150%) contrast(200%);
+    }
+
+    &::after {
+      background: linear-gradient(var(--angle), var(--color-1), var(--color-2), var(--color-3));
+      mix-blend-mode: color-dodge;
+    }
+  } 
+}
+
+/* === Pen styling, ignore */
+
+h1 {
+  --font-size: clamp(6.25rem, 3.25rem + 15vw, 13.75rem);
+
+  font: 700 var(--font-size)/1 "Lato", sans-serif;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0;
+
+  &:empty,
+  &:focus {
+    border: 2px dotted white;
+    min-width: 1ch;
+    outline-offset: 5px;
+  }
 }
 
 body {
-  color: #FFFFFF;
+  background: black;
   display: flex;
+  min-height: 100vh;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
 }
 
-/*
-** Apply styles to the parent element
-*/
-.Words {
-  margin: 0 auto;
-  padding: 80px 0;
-  font-family: "Source Sans Pro", Helvetica, Arial, sans-serif;
-  font-size: 68px;
-  font-weight: 900;
-  letter-spacing: -2px;
-  text-transform: uppercase;
-  transform: translate3d(0, 0, 0);
-  -webkit-font-smoothing: antialiased;
-  -webkit-font-kerning: normal;
-  -webkit-text-size-adjust: 100%;
+label {
+  background-color: hsl(240deg, 20%, 50%);
+  border-radius: 5px;
+  color: #fff;
+  padding: 0.5em 1em;
+  
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  
+  &:has(:checked) {
+    background-color: hsl(350deg, 60%, 50%);
+  }
 }
 
-/*
-** Apply common styles to each line of text
-*/
-.Words-line {
-  height: 50px;
-  overflow: hidden;
-  position: relative;
-}
-.Words-line:nth-child(odd) {
-  transform: skew(60deg, -30deg) scaleY(0.66667);
-}
-.Words-line:nth-child(even) {
-  transform: skew(0deg, -30deg) scaleY(1.33333);
-}
-.Words-line:nth-child(1) {
-  left: 29px;
-}
-.Words-line:nth-child(2) {
-  left: 58px;
-}
-.Words-line:nth-child(3) {
-  left: 87px;
-}
-.Words-line:nth-child(4) {
-  left: 116px;
-}
-.Words-line:nth-child(5) {
-  left: 145px;
-}
-.Words-line:nth-child(6) {
-  left: 174px;
-}
-.Words-line:nth-child(7) {
-  left: 203px;
-}
-
-/*
-** Fine-grained text styles
-*/
-p {
-  height: 50px;
-  line-height: 45px;
-  padding: 0 10px;
-  transition: all 0.4s ease-in-out;
-  transform: translate3d(0, 0, 0);
-  vertical-align: top;
-  white-space: nowrap;
-}
-
-/*
-** The hover interaction
-*/
-.Words:hover p {
-  transform: translate3d(0, -50px, 0);
+input {
+  position: absolute;
+  opacity: 0;
 }
